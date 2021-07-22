@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelEF.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    [Migration("20210713115648_now")]
-    partial class now
+    [Migration("20210722092650_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -73,6 +73,23 @@ namespace HotelEF.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PaymentMethods");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            PaymentTypeName = "Swisch"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            PaymentTypeName = "Kort"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            PaymentTypeName = "Kontant"
+                        });
                 });
 
             modelBuilder.Entity("HotelUWP.Models.Reservation", b =>
@@ -81,22 +98,16 @@ namespace HotelEF.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("GuestId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("PaymentMethodId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RoomId1")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentMethodId");
+                    b.HasIndex("GuestId");
 
-                    b.HasIndex("RoomId1");
+                    b.HasIndex("PaymentMethodId");
 
                     b.ToTable("Reservations");
                 });
@@ -115,20 +126,60 @@ namespace HotelEF.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ReservationId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RoomTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReservationId")
-                        .IsUnique()
-                        .HasFilter("[ReservationId] IS NOT NULL");
-
                     b.HasIndex("RoomTypeId");
 
                     b.ToTable("Rooms");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CheckInDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RoomTypeId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CheckInDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RoomTypeId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CheckInDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RoomTypeId = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CheckInDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RoomTypeId = 2
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CheckInDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RoomTypeId = 3
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CheckInDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CheckOutDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RoomTypeId = 3
+                        });
                 });
 
             modelBuilder.Entity("HotelUWP.Models.RoomType", b =>
@@ -147,6 +198,26 @@ namespace HotelEF.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RoomTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Price = 600m,
+                            RoomTypeName = "Enkelrum"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Price = 900m,
+                            RoomTypeName = "Dubbelrum"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Price = 1200m,
+                            RoomTypeName = "Svit"
+                        });
                 });
 
             modelBuilder.Entity("HotelUWP.Models.GuestPhonenumber", b =>
@@ -160,27 +231,23 @@ namespace HotelEF.Migrations
 
             modelBuilder.Entity("HotelUWP.Models.Reservation", b =>
                 {
+                    b.HasOne("HotelUWP.Models.Guest", "Guest")
+                        .WithMany()
+                        .HasForeignKey("GuestId");
+
                     b.HasOne("HotelUWP.Models.PaymentMethod", "PaymentMethod")
                         .WithMany()
                         .HasForeignKey("PaymentMethodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HotelUWP.Models.Room", "Room")
-                        .WithMany()
-                        .HasForeignKey("RoomId1");
+                    b.Navigation("Guest");
 
                     b.Navigation("PaymentMethod");
-
-                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("HotelUWP.Models.Room", b =>
                 {
-                    b.HasOne("HotelUWP.Models.Reservation", null)
-                        .WithOne("Guest")
-                        .HasForeignKey("HotelUWP.Models.Room", "ReservationId");
-
                     b.HasOne("HotelUWP.Models.RoomType", "RoomType")
                         .WithMany()
                         .HasForeignKey("RoomTypeId")
@@ -193,11 +260,6 @@ namespace HotelEF.Migrations
             modelBuilder.Entity("HotelUWP.Models.Guest", b =>
                 {
                     b.Navigation("GuestPhonenumbers");
-                });
-
-            modelBuilder.Entity("HotelUWP.Models.Reservation", b =>
-                {
-                    b.Navigation("Guest");
                 });
 #pragma warning restore 612, 618
         }
