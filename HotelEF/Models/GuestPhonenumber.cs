@@ -11,7 +11,6 @@ namespace HotelUWP.Models
         public int Id { get; set; }
         public string PhoneNumber { get; set; }
         public string GuestId { get; set; }
-
         public Guest Guest { get; set; }
     }
 }

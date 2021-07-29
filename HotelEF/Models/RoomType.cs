@@ -8,12 +8,10 @@ namespace HotelUWP.Models
 {
     public class RoomType
     {
-        
-       
-
         public int Id { get; set; }
         public string RoomTypeName { get; set; }
         public decimal Price { get; set; }
+        //public virtual Room Room { get; set; }
 
     }
 }

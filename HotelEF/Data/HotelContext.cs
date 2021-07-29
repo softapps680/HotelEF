@@ -19,6 +19,11 @@ namespace HotelEF.Data
        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Room>()
+            .HasOne(a => a.Reservation)
+            .WithOne(a => a.Room)
+            .HasForeignKey<Room>(c => c.ReservationId);
+            
             modelBuilder.Entity<RoomType>().HasData(
                 new RoomType
                 {
@@ -92,6 +97,7 @@ namespace HotelEF.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;Initial Catalog=EFHotel;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+           
         }
 
     }

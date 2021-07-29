@@ -9,16 +9,16 @@ namespace HotelUWP.Models
     public class Reservation
     {
         public String Id { get; set; }
-
-
-
+      
         public string GuestId { get; set; }
         public Guest Guest { get; set; }
-
+      
         public int PaymentMethodId { get; set; }
         public PaymentMethod PaymentMethod {get;set;}
 
+        public int RoomId { get; set; }
+        public  Room Room { get; set; }
 
-         
+
     }
 }

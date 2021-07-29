@@ -13,30 +13,70 @@ namespace HotelEF
         {
             Console.WriteLine("Welcome! ");
             Console.WriteLine("1. Make reservation");
-            Console.WriteLine("2. Lista bokningar");
-            Console.WriteLine("3. Lista alla rum");
-            Console.WriteLine("4. Lista lediga rum");
+            Console.WriteLine("2. Reservationslist");
+            Console.WriteLine("3. All rooms");
+            Console.WriteLine("4. Available rooms");
 
             var selection = int.Parse(Console.ReadLine());
 
-            if (selection == 1)
+            switch (selection)
             {
-               Makereservation();
+                case 1:
+                    Makereservation();
+                    break;
+                case 2:
+                    ListReservations();
+                    break;
+                case 3:
+                    ListAllRooms();
+                    break;
+                case 4:
+                    ListFreeRooms();
+                    break;
             }
-            if (selection == 2)
+
+              
+        }
+        public static void ListFreeRooms()
+        {
+            Console.WriteLine("Available rooms today: ");
+            
+            using (var context = new HotelContext())
             {
-                ListReservations();
+                var rooms = context.Rooms.Include(x => x.RoomType)
+               .Where(c => c.CheckInDate != DateTime.Today)
+               .ToList();
+                foreach (var item in rooms)
+                {
+                    Console.WriteLine($"{item.Id} {item.RoomType.RoomTypeName} \t {item.RoomType.Price}");
+                }
             }
+
+        }
+        public static void ListAllRooms()
+        {
+            using (var context = new HotelContext())
+            {
+                var rooms = context.Rooms.Include(x => x.RoomType).ToList();
+                foreach (var item in rooms)
+                {
+                    Console.WriteLine($"{item.Id} {item.RoomType.RoomTypeName} \t {item.RoomType.Price}");
+                }
+            }
+
         }
         public static void ListReservations()
         {
             using (var context = new HotelContext())
             {
-                var reservations = context.Reservations.ToList();
-                foreach(var item in reservations)
+               
+            var reservations = context.Reservations.Include(x => x.Guest).Include(x => x.Room).ThenInclude(x=>x.RoomType).ToList();
+           
+                foreach (var item in reservations)
                 {
-                    Console.WriteLine(item.Id + " " + item.Guest.FirstName);   
-                }
+                Console.WriteLine($" {item.Room.Id} \t {item.Room.RoomType.RoomTypeName} \t {item.Guest.FirstName} \t {item.Guest.LastName}");
+                }  
+                
             }
         }
         public static void Makereservation()
@@ -55,9 +95,11 @@ namespace HotelEF
             Console.Write("Guests alternative phonenumber: ");
             var phone2 = Console.ReadLine();
 
+     
+
             using (var context = new HotelContext())
             {
-                var guest = new Guest
+                var checkinGuest = new Guest
                 {
                     Id = guestId,
                     FirstName = fname,
@@ -72,9 +114,9 @@ namespace HotelEF
                     
                 };
 
-                context.Guests.Add(guest);
-                context.SaveChanges();
-                
+               
+               
+
                 Console.WriteLine(" ");
                 Console.WriteLine("Select paymentmethod (1-3):");
                 foreach (var item in context.PaymentMethods.ToList())
@@ -100,7 +142,7 @@ namespace HotelEF
 
                 foreach (var item in freeRooms)
                 {
-                    Console.WriteLine(item.Id + " " + item.RoomType.RoomTypeName);
+                    Console.WriteLine($"{item.Id} {item.RoomType.RoomTypeName}");
                 }
                 
                 Console.WriteLine("");
@@ -109,24 +151,32 @@ namespace HotelEF
                 var reservationId = Guid.NewGuid().ToString();
                 var roomType = context.Rooms.Where(c => c.Id == roomId).AsNoTracking().FirstOrDefault();
               
-                var reserveRoom = new Room
-                {
-                    Id = roomId,
-                    ReservationId = reservationId,
-                    RoomTypeId=roomType.RoomTypeId,
-                    CheckInDate = DateTime.Parse(checkin),
-                    CheckOutDate = DateTime.Parse(checkout)
-                };
+                
                
                 var reservation = new Reservation
                 {
                     Id= reservationId,
                     PaymentMethodId= paymentMethodId,
-                    GuestId=guestId
+                    GuestId=guestId,
+                    Guest= checkinGuest,
+                    RoomId=roomId
+                   
                 };
-               
-                context.Entry(reserveRoom).State = EntityState.Modified;
+                
+                var reserveRoom = new Room
+                {
+                    Id = roomId,
+                    ReservationId = reservationId,
+                    Reservation = reservation,
+                    RoomTypeId = roomType.RoomTypeId,
+                    CheckInDate = DateTime.Parse(checkin),
+                    CheckOutDate = DateTime.Parse(checkout)
+                };
+
                 context.Reservations.Add(reservation);
+                context.SaveChanges();
+                context.Entry(reserveRoom).State = EntityState.Modified;
+                
                 context.SaveChanges();
                
                 }

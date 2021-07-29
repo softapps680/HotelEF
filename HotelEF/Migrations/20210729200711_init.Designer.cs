@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelEF.Migrations
 {
     [DbContext(typeof(HotelContext))]
-    [Migration("20210722092650_init")]
+    [Migration("20210729200711_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,11 +103,17 @@ namespace HotelEF.Migrations
                     b.Property<int>("PaymentMethodId")
                         .HasColumnType("int");
 
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("GuestId");
+                    b.HasIndex("GuestId")
+                        .IsUnique()
+                        .HasFilter("[GuestId] IS NOT NULL");
 
-                    b.HasIndex("PaymentMethodId");
+                    b.HasIndex("PaymentMethodId")
+                        .IsUnique();
 
                     b.ToTable("Reservations");
                 });
@@ -126,12 +132,16 @@ namespace HotelEF.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ReservationId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("RoomTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ReservationId")
+                        .IsUnique()
+                        .HasFilter("[ReservationId] IS NOT NULL");
 
                     b.HasIndex("RoomTypeId");
 
@@ -232,12 +242,12 @@ namespace HotelEF.Migrations
             modelBuilder.Entity("HotelUWP.Models.Reservation", b =>
                 {
                     b.HasOne("HotelUWP.Models.Guest", "Guest")
-                        .WithMany()
-                        .HasForeignKey("GuestId");
+                        .WithOne("Reservation")
+                        .HasForeignKey("HotelUWP.Models.Reservation", "GuestId");
 
                     b.HasOne("HotelUWP.Models.PaymentMethod", "PaymentMethod")
-                        .WithMany()
-                        .HasForeignKey("PaymentMethodId")
+                        .WithOne("Reservation")
+                        .HasForeignKey("HotelUWP.Models.Reservation", "PaymentMethodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -248,11 +258,17 @@ namespace HotelEF.Migrations
 
             modelBuilder.Entity("HotelUWP.Models.Room", b =>
                 {
+                    b.HasOne("HotelUWP.Models.Reservation", "Reservation")
+                        .WithOne("Room")
+                        .HasForeignKey("HotelUWP.Models.Room", "ReservationId");
+
                     b.HasOne("HotelUWP.Models.RoomType", "RoomType")
                         .WithMany()
                         .HasForeignKey("RoomTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Reservation");
 
                     b.Navigation("RoomType");
                 });
@@ -260,6 +276,18 @@ namespace HotelEF.Migrations
             modelBuilder.Entity("HotelUWP.Models.Guest", b =>
                 {
                     b.Navigation("GuestPhonenumbers");
+
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("HotelUWP.Models.PaymentMethod", b =>
+                {
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("HotelUWP.Models.Reservation", b =>
+                {
+                    b.Navigation("Room");
                 });
 #pragma warning restore 612, 618
         }

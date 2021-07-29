@@ -74,7 +74,8 @@ namespace HotelEF.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     GuestId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    PaymentMethodId = table.Column<int>(type: "int", nullable: false)
+                    PaymentMethodId = table.Column<int>(type: "int", nullable: false),
+                    RoomId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -100,13 +101,19 @@ namespace HotelEF.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     RoomTypeId = table.Column<int>(type: "int", nullable: false),
-                    ReservationId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReservationId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_Reservations_ReservationId",
+                        column: x => x.ReservationId,
+                        principalTable: "Reservations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Rooms_RoomTypes_RoomTypeId",
                         column: x => x.RoomTypeId,
@@ -156,12 +163,22 @@ namespace HotelEF.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_GuestId",
                 table: "Reservations",
-                column: "GuestId");
+                column: "GuestId",
+                unique: true,
+                filter: "[GuestId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_PaymentMethodId",
                 table: "Reservations",
-                column: "PaymentMethodId");
+                column: "PaymentMethodId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_ReservationId",
+                table: "Rooms",
+                column: "ReservationId",
+                unique: true,
+                filter: "[ReservationId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Rooms_RoomTypeId",
@@ -175,19 +192,19 @@ namespace HotelEF.Migrations
                 name: "GuestPhoneNumbers");
 
             migrationBuilder.DropTable(
+                name: "Rooms");
+
+            migrationBuilder.DropTable(
                 name: "Reservations");
 
             migrationBuilder.DropTable(
-                name: "Rooms");
+                name: "RoomTypes");
 
             migrationBuilder.DropTable(
                 name: "Guests");
 
             migrationBuilder.DropTable(
                 name: "PaymentMethods");
-
-            migrationBuilder.DropTable(
-                name: "RoomTypes");
         }
     }
 }
